@@ -42,6 +42,9 @@ public class User {
 		return "User [userId=" + userId + ", name=" + name + ", email=" + email + ", password=" + password + "]";
 	}
 	
+	public String getPassword() {
+		return password;
+	}
 
 
 	
