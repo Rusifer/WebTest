@@ -3,6 +3,7 @@ package com.webtest.web;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -42,8 +43,14 @@ public class UserController {
 		}
 		
 		System.out.println("Login Success!");
-		session.setAttribute("user", user);
+		session.setAttribute("sessionedUser", user);
 		
+		return "redirect:/";
+	}
+	
+	@GetMapping("/logout")
+	public String logout(HttpSession session) {
+		session.removeAttribute("sessionedUser");
 		return "redirect:/";
 	}
 	
@@ -66,8 +73,22 @@ public class UserController {
 	}
 	
 	@GetMapping("/{id}/form")
-	public String updateForm(@PathVariable Long id, Model model) throws Exception {
-		Optional<User> user =  userRepository.findById(id);
+	public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
+		
+		Object tempUser = session.getAttribute("sessionedUser");
+		
+		
+		if(tempUser == null) {
+			return "redirect:/users/loginForm";
+		}
+		
+		User sessionedUser = (User) tempUser;
+		
+		if(!id.equals(sessionedUser.getId())) {
+			throw new IllegalStateException(id+"자신의 정보만 수정할 수 있습니다.");
+		}
+		
+		Optional<User> user =  userRepository.findById(sessionedUser.getId());
 		
 		if(user.isPresent()) {
 			User exentity = user.get();
@@ -79,12 +100,25 @@ public class UserController {
 	}
 	
 	@PutMapping("/{id}")
-	public String update(@PathVariable Long id, User newUser) throws Exception {
-		Optional<User> user =  userRepository.findById(id);
+	public String update(@PathVariable Long id, User updatedUser, HttpSession session) {
+		
+		Object tempUser = session.getAttribute("sessionedUser");
+		
+		if(tempUser == null) {
+			return "redirect:/users/loginForm";
+		}
+		
+		User sessionedUser = (User) tempUser;
+		
+		if(!id.equals(sessionedUser.getId())) {
+			throw new IllegalStateException(id+"자신의 정보만 수정할 수 있습니다.");
+		}
+		
+		Optional<User> user =  userRepository.findById(sessionedUser.getId());
 		
 		if(user.isPresent()) {
 			User exentity = user.get();
-			exentity.update(newUser);
+			exentity.update(updatedUser);
 			userRepository.save(exentity);
 			return "redirect:/users";
 		} else {
