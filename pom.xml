@@ -13,6 +13,7 @@
 	<version>0.1</version>
 	<name>WebTest</name>
 	<description>Web Test</description>
+	<packaging>war</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,9 +58,12 @@
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-data-jpa</artifactId>
-		    <version>2.3.4.RELEASE</version>
+		    </dependency>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-tomcat</artifactId>
+		    <scope>provided</scope>
 		</dependency>
-		
 		
 	</dependencies>
 
