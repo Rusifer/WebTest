@@ -1,4 +1,4 @@
-package com.webtest.web;
+package com.webtest.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,6 +33,24 @@ public class User {
 		this.password = password;
 	}
 	
+	public boolean matchPassword(String newPassword) {
+		if(newPassword == null) {
+			return false;
+		}
+		
+		return newPassword.equals(password);
+	}
+	
+	
+	public String getUserId() {
+		return userId;
+	}
+	public boolean matchId(Long newId) {
+		if(newId == null) return false;
+		
+		return newId.equals(id);
+	}
+	
 	public void update(User newUser) {
 		this.password = newUser.password;
 		this.name = newUser.name;
@@ -43,13 +61,7 @@ public class User {
 		return "User [userId=" + userId + ", name=" + name + ", email=" + email + ", password=" + password + "]";
 	}
 	
-	public String getPassword() {
-		return password;
-	}
 	
-	public Long getId() {
-		return id;
-	}
 
 
 	

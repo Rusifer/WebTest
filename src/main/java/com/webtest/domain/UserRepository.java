@@ -1,4 +1,4 @@
-package com.webtest.web;
+package com.webtest.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

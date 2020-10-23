@@ -15,11 +15,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.webtest.domain.User;
+import com.webtest.domain.UserRepository;
+
 @Controller
 @RequestMapping("/users")
 public class UserController {
 //	private List<User> users = new ArrayList<User>();
 	
+	private static final String SESSIONED_USER = "sessionedUser";
 	@Autowired
 	private UserRepository userRepository;
 	
@@ -37,20 +41,21 @@ public class UserController {
 			return "redirect:/users/loginForm";
 		} 
 		
-		if(!password.equals(user.getPassword())) {
+//		if(!password.equals(user.getPassword())) {//객체에서 값을 꺼내기 보다는 객체에게 일을 시키자.
+		if(!user.matchPassword(password)) {
 			System.out.println("Login Success!");
 			return "redirect:/users/loginForm";
 		}
 		
 		System.out.println("Login Success!");
-		session.setAttribute("sessionedUser", user);
+		session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
 		
 		return "redirect:/";
 	}
 	
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
-		session.removeAttribute("sessionedUser");
+		session.removeAttribute(HttpSessionUtils.USER_SESSION_KEY);
 		return "redirect:/";
 	}
 	
@@ -75,20 +80,18 @@ public class UserController {
 	@GetMapping("/{id}/form")
 	public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
 		
-		Object tempUser = session.getAttribute("sessionedUser");
-		
-		
-		if(tempUser == null) {
+		if(HttpSessionUtils.isLoginUser(session)) {
 			return "redirect:/users/loginForm";
 		}
 		
-		User sessionedUser = (User) tempUser;
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
 		
-		if(!id.equals(sessionedUser.getId())) {
+//		if(!id.equals(sessionedUser.getId())) {
+		if(!sessionedUser.matchId(id)) {
 			throw new IllegalStateException(id+"자신의 정보만 수정할 수 있습니다.");
 		}
 		
-		Optional<User> user =  userRepository.findById(sessionedUser.getId());
+		Optional<User> user =  userRepository.findById(id);
 		
 		if(user.isPresent()) {
 			User exentity = user.get();
@@ -102,19 +105,17 @@ public class UserController {
 	@PutMapping("/{id}")
 	public String update(@PathVariable Long id, User updatedUser, HttpSession session) {
 		
-		Object tempUser = session.getAttribute("sessionedUser");
-		
-		if(tempUser == null) {
+		if(HttpSessionUtils.isLoginUser(session)) {
 			return "redirect:/users/loginForm";
 		}
 		
-		User sessionedUser = (User) tempUser;
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
 		
-		if(!id.equals(sessionedUser.getId())) {
+		if(!sessionedUser.matchId(id)) {
 			throw new IllegalStateException(id+"자신의 정보만 수정할 수 있습니다.");
 		}
 		
-		Optional<User> user =  userRepository.findById(sessionedUser.getId());
+		Optional<User> user =  userRepository.findById(id);
 		
 		if(user.isPresent()) {
 			User exentity = user.get();
